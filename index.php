@@ -656,7 +656,7 @@ if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
         </div>
 
         <!-- 高德地图 API (使用免费版本，无需申请key) -->
-        <script src="https://webapi.amap.com/maps?v=2.0&key=5b32ff076a1eadf399deca554e52796b"></script>
+        <script src="https://webapi.amap.com/maps?v=2.0&key=YOUR_AMAP_KEY"></script>
         
         <!-- 地图初始化脚本 -->
         <script>
