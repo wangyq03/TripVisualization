@@ -16,8 +16,15 @@
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             display: flex;
+            flex-direction: column;
+        }
+        
+        .login-wrapper {
+            flex: 1;
+            display: flex;
             align-items: center;
             justify-content: center;
+            padding: 2rem 1rem;
         }
 
         .login-container {
@@ -109,14 +116,6 @@
             display: none;
         }
 
-        .footer {
-            margin-top: 2rem;
-            padding-top: 1.5rem;
-            border-top: 1px solid #e1e5e9;
-            color: #666;
-            font-size: 0.9rem;
-        }
-
         .demo-info {
             background: #e3f2fd;
             padding: 12px;
@@ -138,7 +137,8 @@
     </style>
 </head>
 <body>
-    <div class="login-container">
+    <div class="login-wrapper">
+        <div class="login-container">
         <div class="logo">🗺️</div>
         <h1 class="title">路线可视化展示系统</h1>
         <p class="subtitle">请登录以继续</p>
@@ -161,13 +161,27 @@
             <div class="error-message" id="errorMessage"></div>
         </form>
 
-        <div class="footer">
-            <p>© 2025 coolqing.com</p>
         </div>
     </div>
 
+    <!-- 底部区域 -->
+    <footer class="footer">
+        <div class="footer-container">
+            <div class="footer-content">
+                <div class="footer-links">
+                    <a href="https://tyt-maps.coolqing.com/exchangetools/" target="_blank" class="footer-link">
+                        <span class="footer-link-icon">🔧</span>
+                        新代调发货转换手机号工具
+                    </a>
+                </div>
+                <div class="footer-text">
+                    © 2025 路线可视化展示系统
+                </div>
+            </div>
+        </div>
+    </footer>
+
     <script src="js/login.js"></script>
-    
     <!-- 用户菜单组件 -->
     <script src="js/user-menu.js"></script>
 </body>

@@ -1,13 +1,12 @@
 # 🗺️ 路线可视化展示系统
 
 一个功能完整的基于PHP和高德地图的Web应用，用于在地图上可视化展示和管理您的路线信息。
-本程序由CodeBuddy完成开发
 
-> **✨ 最新更新**：v3.3.0 智能路线着色！根据行程连贯性自动分配颜色，优化地图控件布局！
+> **✨ 最新更新**：v3.3.1 MySQL数据库集成！用户数据迁移到远程MySQL服务器，提供更好的数据管理和扩展性！
 
 ![GitHub](https://img.shields.io/badge/PHP-7.4+-blue)
 ![GitHub](https://img.shields.io/badge/License-MIT-green)
-![GitHub](https://img.shields.io/badge/Version-v3.3.0-orange)
+![GitHub](https://img.shields.io/badge/Version-v3.3.1-orange)
 
 ---
 
@@ -95,10 +94,60 @@
 
 - **PHP 7.4+** 或更高版本
 - **Web服务器**（Apache、Nginx 或 PHP内置服务器）
+- **MySQL 5.7+** 或更高版本
 - **现代浏览器**支持 JavaScript ES6+
 - **高德地图 API Key**（免费申请）
+- **PDO MySQL扩展**（PHP数据库连接）
 
-### 1. 获取高德地图 API Key
+### 1. 配置数据库
+
+**重要**：系统现在需要MySQL数据库来存储用户数据。
+
+#### 数据库配置：
+
+1. 创建数据库：
+```sql
+CREATE DATABASE route_visualization CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+```
+
+2. 导入用户表：
+```bash
+mysql -u root -p route_visualization < create_users.sql
+```
+
+3. 创建数据库用户（推荐）：
+```sql
+CREATE USER 'route_user'@'localhost' IDENTIFIED BY 'your_secure_password';
+GRANT SELECT, INSERT, UPDATE, DELETE ON route_visualization.* TO 'route_user'@'localhost';
+FLUSH PRIVILEGES;
+```
+
+4. 创建配置文件：
+```bash
+# 复制配置模板
+cp api/config.php.example api/config.php
+# 编辑配置文件
+nano api/config.php
+```
+
+5. 修改数据库连接配置：
+编辑 `api/config.php`，修改数据库连接参数：
+```php
+$db_config = [
+    'host' => 'localhost',        // 数据库主机
+    'dbname' => 'route_visualization',  // 数据库名
+    'username' => 'route_user',  // 数据库用户名
+    'password' => 'your_secure_password',  // 数据库密码
+    'charset' => 'utf8mb4'
+];
+```
+
+> 📁 **配置文件**：`api/config.php` 存放数据库连接参数，请确保文件权限安全。
+> 📝 **配置模板**：使用 `api/config.php.example` 作为配置模板。
+
+> 🛡️ **安全提示**：不要将数据库密码提交到版本控制系统，建议使用环境变量。
+
+### 2. 获取高德地图 API Key
 
 **重要**：系统需要高德地图 API Key 才能正常显示地图。
 
@@ -112,7 +161,7 @@
    - 服务平台：选择 **Web端(JS API)**
    - Key名称：任意（如"路线地图"）
    - 白名单：可留空或填写域名
-6. 复制生成的Key
+6. 复制生成的Key（格式类似：`a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6`）
 
 #### 配置到项目：
 
@@ -126,7 +175,27 @@
 
 > 💡 **免费额度**：个人开发者免费 30万次/天，足够个人项目使用！
 
-### 2. 服务器部署
+### 2. 本地测试（推荐）
+
+**Windows用户**：
+
+```bash
+# 双击运行
+start-server.bat
+
+# 或手动启动
+php -S localhost:8000
+```
+
+**Mac/Linux用户**：
+
+```bash
+php -S localhost:8000
+```
+
+然后访问：`http://localhost:8000`
+
+### 3. 服务器部署
 
 ```bash
 # 上传项目文件
@@ -140,12 +209,15 @@ chmod 644 data/*
 # 根目录指向项目目录
 ```
 
-### 3. 登录系统
+### 4. 登录系统
 
+**默认账户**（部署后请立即修改）：
 - **管理员**：`admin` / `admin123`
-- **普通用户**：`user` / `123456`
+- **普通用户**：`user` / `user123`
 
-### 4. 开始使用
+> ⚠️ **安全提醒**：部署后请立即修改默认密码，使用强密码策略。
+
+### 5. 开始使用
 
 1. **查看地图**：访问首页 `index.php`
 2. **上传行程**：点击"行程编辑"，上传CSV或Excel文件
@@ -156,11 +228,15 @@ chmod 644 data/*
 ## 📂 项目结构
 
 ```
-maps/
+tyt-maps.coolqing.com/
 ├── 📁 api/                  # 后端API接口
-│   ├── auth.php            # 用户认证API
+│   ├── config.php.example    # 数据库配置模板
+│   ├── config.php          # 数据库配置文件（需要创建）
+│   ├── auth.php            # 用户认证API（MySQL）
 │   ├── cities.php          # 城市数据API
 │   └── trips.php           # 行程数据API
+├── 📄 create_users.sql     # 用户表结构和默认数据
+├── 📄 .gitignore          # 版本控制忽略文件
 ├── 📁 css/                  # 前端样式
 │   └── common.css          # 公共样式（统一UI风格）
 ├── 📁 data/                 # 数据存储（JSON + CSV）
@@ -183,7 +259,12 @@ maps/
 **核心文件说明**：
 - **前端页面**：4个主要页面（登录、地图、编辑、管理）
 - **后端API**：3个RESTful API（认证、城市、行程）
-- **数据存储**：JSON格式城市库 + CSV格式行程数据
+- **数据存储**：
+  - **MySQL**：用户数据（新增）
+  - **JSON格式**：城市坐标库
+  - **CSV格式**：行程数据
+- **配置文件**：`config.php` 数据库连接配置
+- **SQL文件**：`create_users.sql` 用户表结构和默认数据
 - **前端资源**：统一CSS样式 + 模块化JS脚本
 
 ---
@@ -505,9 +586,92 @@ Content-Type: application/json
 }
 ```
 
-### 用户认证 API
+### 数据库配置
 
-#### 🔐 登录
+#### 📄 配置文件
+
+系统已优化数据库配置管理：
+
+**配置文件分离**：
+- `api/config.php.example` - 配置模板（可提交到版本控制）
+- `api/config.php` - 实际配置文件（需手动创建，包含敏感信息）
+
+**安全措施**：
+- `.gitignore` 已配置，防止敏感配置文件泄露
+- 支持环境变量覆盖配置
+- 使用专用数据库用户建议
+
+系统使用 `api/config.php` 存储数据库连接参数：
+
+```php
+<?php
+// 数据库配置
+$db_config = [
+    'host' => 'localhost',        // 数据库主机
+    'dbname' => 'route_visualization',  // 数据库名
+    'username' => 'your_db_user',  // 数据库用户名
+    'password' => 'your_secure_password',  // 数据库密码
+    'charset' => 'utf8mb4',
+    'options' => [
+        PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+        PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+        PDO::ATTR_EMULATE_PREPARES => false,
+    ]
+];
+```
+
+#### 🛡️ 安全配置建议
+
+1. **专用数据库用户**：
+```sql
+-- 创建专用用户（不要使用root）
+CREATE USER 'route_app'@'localhost' IDENTIFIED BY 'StrongPassword123!';
+-- 只授予必要权限
+GRANT SELECT, INSERT, UPDATE, DELETE ON route_visualization.* TO 'route_app'@'localhost';
+FLUSH PRIVILEGES;
+```
+
+2. **环境变量配置**：
+```php
+// 推荐使用环境变量
+$db_config = [
+    'host' => $_ENV['DB_HOST'] ?? 'localhost',
+    'dbname' => $_ENV['DB_NAME'] ?? 'route_visualization', 
+    'username' => $_ENV['DB_USER'] ?? 'route_app',
+    'password' => $_ENV['DB_PASS'] ?? 'default_password'
+];
+```
+
+3. **文件安全**：
+```bash
+# 设置适当的文件权限
+chmod 640 api/config.php
+chown www-data:www-data api/config.php
+```
+
+#### 🔄 从文件系统迁移
+
+如果您要从旧版本（文件存储用户）迁移到MySQL：
+
+1. **备份现有数据**：
+```bash
+cp api/auth.php api/auth.php.backup
+```
+
+2. **部署新配置**：
+```bash
+# 复制配置模板
+cp api/config.php.example api/config.php
+# 编辑配置文件
+nano api/config.php
+```
+
+3. **导入用户表**：
+```bash
+mysql -u root -p route_visualization < create_users.sql
+```
+
+### 用户认证 API
 
 ```http
 POST /api/auth.php
@@ -649,7 +813,42 @@ $users = [
 
 ## 🔄 更新日志
 
-### v3.3.0 (2025-01-20) - 当前版本
+### v3.3.1 (2025-01-20) - 当前版本
+
+#### 🗄️ 数据库升级
+- 🔧 **MySQL集成**：用户数据从文件存储迁移到MySQL数据库
+  - 新增 `config.php` 数据库配置文件
+  - 新增 `create_users.sql` 用户表结构和默认数据
+  - 完整的用户管理数据库支持
+
+#### 🛡️ 安全增强
+- 🔐 **安全认证**：基于MySQL的用户认证系统
+  - 密码哈希存储（password_hash）
+  - 角色权限管理（admin/user）
+  - 会话管理和登录日志
+  - 数据库参数配置（非硬编码）
+
+#### 📁 文件结构调整
+- 📝 **配置管理**：
+  - 独立的数据库配置文件
+  - 用户表SQL创建脚本
+  - 安全的凭据管理建议
+- 🗂️ **新增文件**：
+  - `api/config.php` - 数据库连接配置
+  - `create_users.sql` - 用户表结构和数据
+
+#### 📖 文档更新
+- 📘 **部署指南**：新增MySQL数据库配置步骤
+- 🛡️ **安全配置**：数据库安全最佳实践
+- 🔧 **SQL文档**：完整的用户表结构说明
+- ✅ **部署检查清单**：确保安全部署的必要步骤
+
+#### ⚠️ 重要提醒
+- **部署后操作**：立即修改默认密码
+- **安全建议**：使用专用数据库用户
+- **配置文件**：不要将凭据提交到版本控制
+
+### v3.3.0 (2025-01-20)
 
 #### 🎉 新增功能
 - ✨ **智能路线着色系统**：根据行程连贯性自动分配颜色

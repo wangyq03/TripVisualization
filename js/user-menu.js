@@ -105,6 +105,10 @@ class UserMenu {
                         </div>
                     </div>
                     <div class="dropdown-divider"></div>
+                    <a href="profile.php" class="dropdown-item profile-item">
+                        <span class="item-icon">👤</span>
+                        <span class="item-text">个人中心</span>
+                    </a>
                     <a href="#" class="dropdown-item logout-item" onclick="userMenu.handleLogout()">
                         <span class="item-icon">🚪</span>
                         <span class="item-text">退出登录</span>
@@ -550,6 +554,11 @@ class UserMenu {
             }
 
             .dropdown-item:hover {
+                background: rgba(102, 126, 234, 0.1);
+                color: #667eea;
+            }
+
+            .profile-item:hover {
                 background: rgba(102, 126, 234, 0.1);
                 color: #667eea;
             }

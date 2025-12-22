@@ -11,7 +11,6 @@ body {
     min-height: 100vh;
     color: #333;
 }
-
 /* 导航栏样式 */
 .navbar {
     background: rgba(255, 255, 255, 0.95);
@@ -285,7 +284,6 @@ body {
     color: #667eea;
     margin-bottom: 0.5rem;
 }
-
 .stat-date {
     font-size: 1.5rem;
     font-weight: bold;
@@ -372,4 +370,15 @@ body {
 /* 用户菜单在导航栏中的间距 */
 #userMenuContainer {
     margin-left: 2rem;
+}
+
+/* 页面主体布局调整 - 为底部留出空间 */
+body {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+.main-content {
+    flex: 1;
 }

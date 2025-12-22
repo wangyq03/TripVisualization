@@ -494,356 +494,357 @@ if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
     </style>
 </head>
 <body>
-    <!-- 导航栏 -->
-    <nav class="navbar">
-        <div class="nav-container">
-            <a href="index.php" class="nav-brand">路线可视化展示系统</a>
-            <ul class="nav-menu">
-                <li class="nav-item">
-                    <a href="index.php" class="nav-link active">
-                        <span class="nav-icon">🗺️</span>
-                        地图展示
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a href="trips-editor.php" class="nav-link">
-                        <span class="nav-icon">📝</span>
-                        行程编辑
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a href="cities-manager.php" class="nav-link">
-                        <span class="nav-icon">📍</span>
-                        城市管理
-                    </a>
-                </li>
-            </ul>
-        </div>
-    </nav>
+    <div class="main-content">
+        <!-- 导航栏 -->
+        <nav class="navbar">
+            <div class="nav-container">
+                <a href="index.php" class="nav-brand">路线可视化展示系统</a>
+                <ul class="nav-menu">
+                    <li class="nav-item">
+                        <a href="index.php" class="nav-link active">
+                            <span class="nav-icon">🗺️</span>
+                            地图展示
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="trips-editor.php" class="nav-link">
+                            <span class="nav-icon">📝</span>
+                            行程编辑
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="cities-manager.php" class="nav-link">
+                            <span class="nav-icon">📍</span>
+                            城市管理
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
 
-    <div class="page-container">
-        <!-- 日期筛选 -->
-        <div class="card">
-            <h2 class="card-title">📅 日期筛选</h2>
-            <form id="filter-form" style="display: flex; gap: 1rem; align-items: end; flex-wrap: wrap; justify-content: space-between;">
-                <div style="display: flex; gap: 1rem; align-items: end; flex: 1;">
-                    <div class="form-group" style="margin-bottom: 0;">
-                        <label class="form-label" for="start-date">开始日期</label>
-                        <input type="date" id="start-date" name="start_date" max="" class="form-input">
+        <div class="page-container">
+            <!-- 日期筛选 -->
+            <div class="card">
+                <h2 class="card-title">📅 日期筛选</h2>
+                <form id="filter-form" style="display: flex; gap: 1rem; align-items: end; flex-wrap: wrap; justify-content: space-between;">
+                    <div style="display: flex; gap: 1rem; align-items: end; flex: 1;">
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label class="form-label" for="start-date">开始日期</label>
+                            <input type="date" id="start-date" name="start_date" max="" class="form-input">
+                        </div>
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label class="form-label" for="end-date">结束日期</label>
+                            <input type="date" id="end-date" name="end_date" max="" class="form-input">
+                        </div>
+                        <button type="submit" class="btn btn-primary">
+                            <span>🔍</span> 筛选行程
+                        </button>
                     </div>
-                    <div class="form-group" style="margin-bottom: 0;">
-                        <label class="form-label" for="end-date">结束日期</label>
-                        <input type="date" id="end-date" name="end_date" max="" class="form-input">
+                    <button type="button" id="refresh-cache" class="btn btn-secondary" onclick="forceRefresh()" style="margin-left: auto;">
+                        <span>🔄</span> 强制刷新
+                    </button>
+                </form>
+            </div>
+
+            <!-- 地图区域 -->
+            <div class="card">
+                <h2 class="card-title">🗺️ 路线地图</h2>
+                <div id="map-loading" class="map-loading">
+                    <strong>📍 地图加载中：</strong> 
+                    正在加载高德地图服务...
+                </div>
+                <div class="map-container" id="map-container">
+                    <button class="fullscreen-btn" id="fullscreen-btn" title="全屏显示">
+                        <span class="fullscreen-icon">⛶</span>
+                        <span class="fullscreen-text">全屏</span>
+                    </button>
+                    <div id="map"></div>
+                    
+                    <!-- 地图图例 -->
+                    <div class="map-legend">
+                        <div class="map-legend-title">📍 图例说明</div>
+                        
+                        <div class="legend-item">
+                            <div class="legend-icon">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                                    <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" 
+                                        fill="#4CAF50" stroke="white" stroke-width="1"/>
+                                </svg>
+                            </div>
+                            <span class="legend-label">周期起始点</span>
+                        </div>
+                        
+                        <div class="legend-item">
+                            <div class="legend-icon">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                                    <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" 
+                                        fill="#f44336" stroke="white" stroke-width="1"/>
+                                </svg>
+                            </div>
+                            <span class="legend-label">周期结束点</span>
+                        </div>
+                        
+                        <div class="legend-item">
+                            <div class="legend-icon">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 8 8">
+                                    <circle cx="4" cy="4" r="3" fill="#4CAF50" stroke="white" stroke-width="1"/>
+                                </svg>
+                            </div>
+                            <span class="legend-label">行程起点</span>
+                        </div>
+                        
+                        <div class="legend-item">
+                            <div class="legend-icon">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 8 8">
+                                    <circle cx="4" cy="4" r="3" fill="#f44336" stroke="white" stroke-width="1"/>
+                                </svg>
+                            </div>
+                            <span class="legend-label">行程终点</span>
+                        </div>
+                    <!-- 时序开关 -->
+                    <div class="sequence-toggle-control">
+                        <span class="sequence-toggle-label">显示时序</span>
+                        <label class="switch">
+                            <input type="checkbox" id="show-sequence-toggle">
+                            <span class="slider"></span>
+                        </label>
                     </div>
-                    <button type="submit" class="btn btn-primary">
-                        <span>🔍</span> 筛选行程
+                    
+                    <!-- 全屏模式下的行程列表侧边栏 -->
+                    <div class="fullscreen-trip-list" id="fullscreen-trip-list">
+                        <div class="fullscreen-trip-list-header">
+                            <div class="fullscreen-trip-list-close" id="fullscreen-trip-list-close">>></div>
+                            <span>📋 行程列表</span>
+                        </div>
+                        <div class="fullscreen-trip-list-content" id="fullscreen-trip-list-content">
+                            <div class="loading">正在加载...</div>
+                        </div>
+                    </div>
+                    
+                    <!-- 展开行程列表按钮 -->
+                    <button class="trip-list-toggle-btn" id="trip-list-toggle-btn">
+                        行程列表
                     </button>
                 </div>
-                <button type="button" id="refresh-cache" class="btn btn-secondary" onclick="forceRefresh()" style="margin-left: auto;">
-                    <span>🔄</span> 强制刷新
-                </button>
-            </form>
-        </div>
-
-        <!-- 地图区域 -->
-        <div class="card">
-            <h2 class="card-title">🗺️ 路线地图</h2>
-            <div id="map-loading" class="map-loading">
-                <strong>📍 地图加载中：</strong> 
-                正在加载高德地图服务...
             </div>
-            <div class="map-container" id="map-container">
-                <button class="fullscreen-btn" id="fullscreen-btn" title="全屏显示">
-                    <span class="fullscreen-icon">⛶</span>
-                    <span class="fullscreen-text">全屏</span>
-                </button>
-                <div id="map"></div>
-                
-                <!-- 地图图例 -->
-                <div class="map-legend">
-                    <div class="map-legend-title">📍 图例说明</div>
-                    
-                    <div class="legend-item">
-                        <div class="legend-icon">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                                <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" 
-                                      fill="#4CAF50" stroke="white" stroke-width="1"/>
-                            </svg>
+
+            <!-- 统计和行程列表 -->
+            <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 2rem;">
+                <!-- 统计信息 -->
+                <div class="card">
+                    <h2 class="card-title">📊 数据统计</h2>
+                    <div class="stats">
+                        <div class="stat-card">
+                            <div class="stat-number" id="total-trips">0</div>
+                            <div class="stat-label">总行程数</div>
                         </div>
-                        <span class="legend-label">周期起始点</span>
-                    </div>
-                    
-                    <div class="legend-item">
-                        <div class="legend-icon">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                                <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" 
-                                      fill="#f44336" stroke="white" stroke-width="1"/>
-                            </svg>
+                        <div class="stat-card">
+                            <div class="stat-number" id="unique-cities">0</div>
+                            <div class="stat-label">涉及城市</div>
                         </div>
-                        <span class="legend-label">周期结束点</span>
-                    </div>
-                    
-                    <div class="legend-item">
-                        <div class="legend-icon">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 8 8">
-                                <circle cx="4" cy="4" r="3" fill="#4CAF50" stroke="white" stroke-width="1"/>
-                            </svg>
-                        </div>
-                        <span class="legend-label">行程起点</span>
-                    </div>
-                    
-                    <div class="legend-item">
-                        <div class="legend-icon">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 8 8">
-                                <circle cx="4" cy="4" r="3" fill="#f44336" stroke="white" stroke-width="1"/>
-                            </svg>
-                        </div>
-                        <span class="legend-label">行程终点</span>
                     </div>
                 </div>
                 
-                <!-- 时序开关 -->
-                <div class="sequence-toggle-control">
-                    <span class="sequence-toggle-label">显示时序</span>
-                    <label class="switch">
-                        <input type="checkbox" id="show-sequence-toggle">
-                        <span class="slider"></span>
-                    </label>
-                </div>
-                
-                <!-- 全屏模式下的行程列表侧边栏 -->
-                <div class="fullscreen-trip-list" id="fullscreen-trip-list">
-                    <div class="fullscreen-trip-list-header">
-                        <div class="fullscreen-trip-list-close" id="fullscreen-trip-list-close">>></div>
-                        <span>📋 行程列表</span>
-                    </div>
-                    <div class="fullscreen-trip-list-content" id="fullscreen-trip-list-content">
-                        <div class="loading">正在加载...</div>
+                <!-- 行程列表 -->
+                <div class="card">
+                    <h2 class="card-title">📋 行程列表</h2>
+                    <div id="trip-list" style="max-height: 400px; overflow-y: auto;">
+                        <div class="loading">正在加载行程数据...</div>
                     </div>
                 </div>
-                
-                <!-- 展开行程列表按钮 -->
-                <button class="trip-list-toggle-btn" id="trip-list-toggle-btn">
-                    行程列表
-                </button>
             </div>
         </div>
 
-        <!-- 统计和行程列表 -->
-        <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 2rem;">
-            <!-- 统计信息 -->
-            <div class="card">
-                <h2 class="card-title">📊 数据统计</h2>
-                <div class="stats">
-                    <div class="stat-card">
-                        <div class="stat-number" id="total-trips">0</div>
-                        <div class="stat-label">总行程数</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-number" id="unique-cities">0</div>
-                        <div class="stat-label">涉及城市</div>
-                    </div>
-                </div>
-            </div>
+        <!-- 高德地图 API (使用免费版本，无需申请key) -->
+        <script src="https://webapi.amap.com/maps?v=2.0&key=5b32ff076a1eadf399deca554e52796b"></script>
+        
+        <!-- 地图初始化脚本 -->
+        <script>
+            // 显示地图加载提示
+            document.addEventListener('DOMContentLoaded', function() {
+                const loadingEl = document.getElementById('map-loading');
+                if (loadingEl) {
+                    loadingEl.style.display = 'block';
+                    // 地图加载成功后隐藏提示
+                    setTimeout(() => {
+                        loadingEl.style.display = 'none';
+                    }, 2000);
+                }
+                
+                // 全屏功能初始化
+                initFullscreenButton();
+            });
             
-            <!-- 行程列表 -->
-            <div class="card">
-                <h2 class="card-title">📋 行程列表</h2>
-                <div id="trip-list" style="max-height: 400px; overflow-y: auto;">
-                    <div class="loading">正在加载行程数据...</div>
-                </div>
-            </div>
-        </div>
+            // 全屏功能
+            function initFullscreenButton() {
+                const fullscreenBtn = document.getElementById('fullscreen-btn');
+                const mapContainer = document.getElementById('map-container');
+                const fullscreenIcon = fullscreenBtn.querySelector('.fullscreen-icon');
+                const fullscreenText = fullscreenBtn.querySelector('.fullscreen-text');
+                
+                let isFullscreen = false;
+                
+                fullscreenBtn.addEventListener('click', function() {
+                    if (!isFullscreen) {
+                        // 进入全屏
+                        mapContainer.classList.add('fullscreen');
+                        fullscreenIcon.textContent = '⛶';
+                        fullscreenText.textContent = '退出全屏';
+                        isFullscreen = true;
+                        
+                        // 触发地图resize事件以适应新尺寸
+                        if (window.map) {
+                            setTimeout(() => {
+                                map.resize();
+                            }, 100);
+                        }
+                        
+                        // 初始化全屏行程列表
+                        initFullscreenTripList();
+                    } else {
+                        // 退出全屏
+                        mapContainer.classList.remove('fullscreen');
+                        fullscreenIcon.textContent = '⛶';
+                        fullscreenText.textContent = '全屏';
+                        isFullscreen = false;
+                        
+                        // 关闭行程列表
+                        const tripList = document.getElementById('fullscreen-trip-list');
+                        if (tripList) {
+                            tripList.classList.remove('expanded');
+                        }
+                        
+                        // 触发地图resize事件
+                        if (window.map) {
+                            setTimeout(() => {
+                                map.resize();
+                            }, 100);
+                        }
+                    }
+                });
+                
+                // ESC键退出全屏
+                document.addEventListener('keydown', function(e) {
+                    if (e.key === 'Escape' && isFullscreen) {
+                        fullscreenBtn.click();
+                    }
+                });
+            }
+            
+            // 初始化全屏行程列表
+            function initFullscreenTripList() {
+                const toggleBtn = document.getElementById('trip-list-toggle-btn');
+                const tripList = document.getElementById('fullscreen-trip-list');
+                const closeBtn = document.getElementById('fullscreen-trip-list-close');
+                
+                if (!toggleBtn || !tripList || !closeBtn) return;
+                
+                // 展开按钮
+                toggleBtn.addEventListener('click', function() {
+                    tripList.classList.add('expanded');
+                });
+                
+                // 关闭按钮
+                closeBtn.addEventListener('click', function() {
+                    tripList.classList.remove('expanded');
+                });
+            }
+            
+            // 更新全屏行程列表内容（由 map.js 调用）
+            window.updateFullscreenTripList = function(trips, colorIndices) {
+                const content = document.getElementById('fullscreen-trip-list-content');
+                if (!content) return;
+                
+                if (trips.length === 0) {
+                    content.innerHTML = '<div style="text-align: center; color: #999; padding: 20px 10px; font-size: 15px;">暂无行程</div>';
+                    return;
+                }
+                
+                const colors = ['#667eea', '#764ba2', '#f093fb', '#f5576c', '#4facfe', '#43e97b'];
+                
+                // 生成行程HTML，为连贯的行程添加颜色边框
+                let tripHtml = '';
+                let currentGroupColor = null;
+                let groupStartIndex = 0;
+                
+                trips.forEach((trip, index) => {
+                    const colorIndex = colorIndices[index];
+                    const color = colors[colorIndex];
+                    const isLastTrip = index === trips.length - 1;
+                    const nextColorIndex = isLastTrip ? null : colorIndices[index + 1];
+                    
+                    // 检查是否是新分组的开始
+                    const isGroupStart = currentGroupColor !== colorIndex;
+                    // 检查是否是分组的结束
+                    const isGroupEnd = isLastTrip || nextColorIndex !== colorIndex;
+                    
+                    if (isGroupStart) {
+                        // 开始新分组
+                        if (currentGroupColor !== null) {
+                            tripHtml += '</div>'; // 关闭上一个分组
+                        }
+                        tripHtml += `<div class="trip-group" style="border-left: 4px solid ${color}; padding-left: 8px;">`;
+                        currentGroupColor = colorIndex;
+                        groupStartIndex = index;
+                    }
+                    
+                    tripHtml += `
+                        <div class="fullscreen-trip-item" 
+                            data-date="${trip.date}" 
+                            data-origin="${trip.origin}" 
+                            data-destination="${trip.destination}"
+                            data-index="${index}"
+                            onmouseover="hoverTripOnMap('${trip.date}', '${trip.origin}', '${trip.destination}', true, ${index})"
+                            onmouseout="hoverTripOnMap('${trip.date}', '${trip.origin}', '${trip.destination}', false, ${index})"
+                            onclick="selectTripOnMap('${trip.date}', '${trip.origin}', '${trip.destination}', this, ${index})">
+                            <div class="fullscreen-trip-date">${trip.date}</div>
+                            <div class="fullscreen-trip-route">
+                                ${trip.origin}<span class="fullscreen-trip-arrow">→</span>${trip.destination}
+                            </div>
+                        </div>`;
+                    
+                    if (isGroupEnd) {
+                        tripHtml += '</div>'; // 关闭当前分组
+                        currentGroupColor = null;
+                    }
+                });
+                
+                content.innerHTML = tripHtml;
+            };
+            
+            // 鼠标悬停在行程列表项上时，高亮地图上的曲线（状态2）
+            window.hoverTripOnMap = function(date, origin, destination, isHover) {
+                if (typeof window.hoverPolylineOnMap === 'function') {
+                    window.hoverPolylineOnMap(date, origin, destination, isHover);
+                }
+            };
+            
+            // 点击选中行程列表项时，高亮并添加流动效果（状态3）
+            window.selectTripOnMap = function(date, origin, destination, element, listIndex = null) {
+                // 移除其他项的选中状态
+                const allItems = document.querySelectorAll('.fullscreen-trip-item');
+                allItems.forEach(item => item.classList.remove('selected'));
+                
+                // 添加当前项的选中状态
+                if (element) {
+                    element.classList.add('selected');
+                }
+                
+                // 调用地图高亮函数，传递索引参数
+                highlightTrip(date, origin, destination, listIndex);
+            };
+            
+            // 强制刷新功能
+            function forceRefresh() {
+                window.location.reload(true);
+            }
+        </script>
+        
+        <!-- 自定义JavaScript - 高德地图版本 -->
+        <script src="js/map.js?v=2025012001"></script>
+        
+        <!-- 用户菜单组件 -->
+        <script src="js/user-menu.js"></script>
     </div>
-
-    <!-- 高德地图 API (使用免费版本，无需申请key) -->
-    <script src="https://webapi.amap.com/maps?v=2.0&key=YOUR_AMAP_KEY"></script>
-    
-    <!-- 地图初始化脚本 -->
-    <script>
-        // 显示地图加载提示
-        document.addEventListener('DOMContentLoaded', function() {
-            const loadingEl = document.getElementById('map-loading');
-            if (loadingEl) {
-                loadingEl.style.display = 'block';
-                // 地图加载成功后隐藏提示
-                setTimeout(() => {
-                    loadingEl.style.display = 'none';
-                }, 2000);
-            }
-            
-            // 全屏功能初始化
-            initFullscreenButton();
-        });
-        
-        // 全屏功能
-        function initFullscreenButton() {
-            const fullscreenBtn = document.getElementById('fullscreen-btn');
-            const mapContainer = document.getElementById('map-container');
-            const fullscreenIcon = fullscreenBtn.querySelector('.fullscreen-icon');
-            const fullscreenText = fullscreenBtn.querySelector('.fullscreen-text');
-            
-            let isFullscreen = false;
-            
-            fullscreenBtn.addEventListener('click', function() {
-                if (!isFullscreen) {
-                    // 进入全屏
-                    mapContainer.classList.add('fullscreen');
-                    fullscreenIcon.textContent = '⛶';
-                    fullscreenText.textContent = '退出全屏';
-                    isFullscreen = true;
-                    
-                    // 触发地图resize事件以适应新尺寸
-                    if (window.map) {
-                        setTimeout(() => {
-                            map.resize();
-                        }, 100);
-                    }
-                    
-                    // 初始化全屏行程列表
-                    initFullscreenTripList();
-                } else {
-                    // 退出全屏
-                    mapContainer.classList.remove('fullscreen');
-                    fullscreenIcon.textContent = '⛶';
-                    fullscreenText.textContent = '全屏';
-                    isFullscreen = false;
-                    
-                    // 关闭行程列表
-                    const tripList = document.getElementById('fullscreen-trip-list');
-                    if (tripList) {
-                        tripList.classList.remove('expanded');
-                    }
-                    
-                    // 触发地图resize事件
-                    if (window.map) {
-                        setTimeout(() => {
-                            map.resize();
-                        }, 100);
-                    }
-                }
-            });
-            
-            // ESC键退出全屏
-            document.addEventListener('keydown', function(e) {
-                if (e.key === 'Escape' && isFullscreen) {
-                    fullscreenBtn.click();
-                }
-            });
-        }
-        
-        // 初始化全屏行程列表
-        function initFullscreenTripList() {
-            const toggleBtn = document.getElementById('trip-list-toggle-btn');
-            const tripList = document.getElementById('fullscreen-trip-list');
-            const closeBtn = document.getElementById('fullscreen-trip-list-close');
-            
-            if (!toggleBtn || !tripList || !closeBtn) return;
-            
-            // 展开按钮
-            toggleBtn.addEventListener('click', function() {
-                tripList.classList.add('expanded');
-            });
-            
-            // 关闭按钮
-            closeBtn.addEventListener('click', function() {
-                tripList.classList.remove('expanded');
-            });
-        }
-        
-        // 更新全屏行程列表内容（由 map.js 调用）
-        window.updateFullscreenTripList = function(trips, colorIndices) {
-            const content = document.getElementById('fullscreen-trip-list-content');
-            if (!content) return;
-            
-            if (trips.length === 0) {
-                content.innerHTML = '<div style="text-align: center; color: #999; padding: 20px 10px; font-size: 15px;">暂无行程</div>';
-                return;
-            }
-            
-            const colors = ['#667eea', '#764ba2', '#f093fb', '#f5576c', '#4facfe', '#43e97b'];
-            
-            // 生成行程HTML，为连贯的行程添加颜色边框
-            let tripHtml = '';
-            let currentGroupColor = null;
-            let groupStartIndex = 0;
-            
-            trips.forEach((trip, index) => {
-                const colorIndex = colorIndices[index];
-                const color = colors[colorIndex];
-                const isLastTrip = index === trips.length - 1;
-                const nextColorIndex = isLastTrip ? null : colorIndices[index + 1];
-                
-                // 检查是否是新分组的开始
-                const isGroupStart = currentGroupColor !== colorIndex;
-                // 检查是否是分组的结束
-                const isGroupEnd = isLastTrip || nextColorIndex !== colorIndex;
-                
-                if (isGroupStart) {
-                    // 开始新分组
-                    if (currentGroupColor !== null) {
-                        tripHtml += '</div>'; // 关闭上一个分组
-                    }
-                    tripHtml += `<div class="trip-group" style="border-left: 4px solid ${color}; padding-left: 8px;">`;
-                    currentGroupColor = colorIndex;
-                    groupStartIndex = index;
-                }
-                
-                tripHtml += `
-                    <div class="fullscreen-trip-item" 
-                         data-date="${trip.date}" 
-                         data-origin="${trip.origin}" 
-                         data-destination="${trip.destination}"
-                         onmouseover="hoverTripOnMap('${trip.date}', '${trip.origin}', '${trip.destination}', true)"
-                         onmouseout="hoverTripOnMap('${trip.date}', '${trip.origin}', '${trip.destination}', false)"
-                         onclick="selectTripOnMap('${trip.date}', '${trip.origin}', '${trip.destination}', this)">
-                        <div class="fullscreen-trip-date">${trip.date}</div>
-                        <div class="fullscreen-trip-route">
-                            ${trip.origin}<span class="fullscreen-trip-arrow">→</span>${trip.destination}
-                        </div>
-                    </div>`;
-                
-                if (isGroupEnd) {
-                    tripHtml += '</div>'; // 关闭当前分组
-                    currentGroupColor = null;
-                }
-            });
-            
-            content.innerHTML = tripHtml;
-        };
-        
-        // 鼠标悬停在行程列表项上时，高亮地图上的曲线（状态2）
-        window.hoverTripOnMap = function(date, origin, destination, isHover) {
-            if (typeof window.hoverPolylineOnMap === 'function') {
-                window.hoverPolylineOnMap(date, origin, destination, isHover);
-            }
-        };
-        
-        // 点击选中行程列表项时，高亮并添加流动效果（状态3）
-        window.selectTripOnMap = function(date, origin, destination, element) {
-            // 移除其他项的选中状态
-            const allItems = document.querySelectorAll('.fullscreen-trip-item');
-            allItems.forEach(item => item.classList.remove('selected'));
-            
-            // 添加当前项的选中状态
-            if (element) {
-                element.classList.add('selected');
-            }
-            
-            // 调用地图高亮函数
-            highlightTrip(date, origin, destination);
-        };
-        
-        // 强制刷新功能
-        function forceRefresh() {
-            window.location.reload(true);
-        }
-    </script>
-    
-    <!-- 自定义JavaScript - 高德地图版本 -->
-    <script src="js/map.js?v=2025012001"></script>
-    
-    <!-- 用户菜单组件 -->
-    <script src="js/user-menu.js"></script>
 </body>
 </html>
