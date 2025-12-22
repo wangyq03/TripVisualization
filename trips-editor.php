@@ -15,7 +15,7 @@ if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
     <title>行程编辑 - 路线可视化展示系统</title>
     
     <!-- 公共样式 -->
-    <link rel="stylesheet" href="css/common.css?v=2024011903">
+    <link rel="stylesheet" href="css/common.css">
     
     <!-- 页面特定样式 -->
     <style>
@@ -81,7 +81,8 @@ if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
     </style>
 </head>
 <body>
-    <!-- 导航栏 -->
+    <div class="main-content">
+        <!-- 导航栏 -->
     <nav class="navbar">
         <div class="nav-container">
             <a href="index.php" class="nav-brand">路线可视化展示系统</a>
@@ -131,7 +132,7 @@ if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
                         <span>👁️</span> 预览数据
                     </button>
                     <button id="upload-btn" class="btn btn-primary" disabled>
-                        <span>⬆️</span> 上传替换
+                        <span>⬆️</span> 确认替换
                     </button>
                     <button id="download-template-btn" class="btn btn-success">
                         <span>📥</span> 下载模板
@@ -215,8 +216,6 @@ if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
             </div>
         </div>
     </div>
-
-    <!-- JavaScript -->
     <!-- SheetJS for Excel parsing -->
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     

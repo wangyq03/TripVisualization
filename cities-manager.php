@@ -22,7 +22,7 @@ if (!isset($_SESSION['user_role']) || $_SESSION['user_role'] !== 'admin') {
     <title>城市管理 - 路线可视化展示系统</title>
     
     <!-- 公共样式 -->
-    <link rel="stylesheet" href="css/common.css?v=2024011903">
+    <link rel="stylesheet" href="css/common.css">
     
     <!-- 页面特定样式 -->
     <style>
@@ -195,7 +195,8 @@ if (!isset($_SESSION['user_role']) || $_SESSION['user_role'] !== 'admin') {
     </style>
 </head>
 <body>
-    <!-- 导航栏 -->
+    <div class="main-content">
+        <!-- 导航栏 -->
     <nav class="navbar">
         <div class="nav-container">
             <a href="index.php" class="nav-brand">路线可视化展示系统</a>
@@ -305,8 +306,6 @@ if (!isset($_SESSION['user_role']) || $_SESSION['user_role'] !== 'admin') {
                 </div>
             </div>
         </div>
-    </div>
-
     <!-- JavaScript -->
     <script src="js/cities-manager.js?v=2024011903"></script>
     

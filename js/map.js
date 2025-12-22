@@ -164,7 +164,7 @@ function clearMap() {
 }
 
 // 添加行程到地图
-function addTripToMap(trip, cities, isStartPoint = false, isEndPoint = false, sequenceNumber = null, colorIndex = 0) {
+function addTripToMap(trip, cities, isStartPoint = false, isEndPoint = false, sequenceNumber = null, colorIndex = 0, curvatureInfo = null, routeGroups = null) {
     const originCity = cities[trip.origin];
     const destCity = cities[trip.destination];
     
@@ -173,21 +173,8 @@ function addTripToMap(trip, cities, isStartPoint = false, isEndPoint = false, se
         return;
     }
     
-    // 创建路线键（区分方向，往返路线分开处理）
-    const forwardRouteKey = trip.origin + '-' + trip.destination;
-    const backwardRouteKey = trip.destination + '-' + trip.origin;
-    
-    // 获取或初始化路线计数器
-    if (!routeCounters[forwardRouteKey]) routeCounters[forwardRouteKey] = 0;
-    if (!routeCounters[backwardRouteKey]) routeCounters[backwardRouteKey] = 0;
-    
-    // 计算路线索引（用于计算弧线偏移，不再用于颜色）
-    const forwardIndex = routeCounters[forwardRouteKey];
-    const backwardIndex = routeCounters[backwardRouteKey];
-    const routeIndex = forwardIndex;
-    
-    // 增加当前方向的计数器
-    routeCounters[forwardRouteKey]++;
+    // 注意：原有的计数器逻辑已被新的曲率算法取代
+    // 保留 routeCounters 以便兼容其他功能
     
     // 起点和终点坐标 [经度, 纬度]
     const originPos = [originCity.longitude, originCity.latitude];
@@ -322,29 +309,42 @@ function addTripToMap(trip, cities, isStartPoint = false, isEndPoint = false, se
     map.add([originMarker, destMarker]);
     markers.push(originMarker, destMarker);
     
-    // 计算弧线路径
+    // 计算弧线路径 - 基于曲率的算法
     const distance = getDistance(originPos, destPos);
-    const maxOffset = Math.min(distance * 0.001, 0.5);
     
-    // 计算偏移
-    let offsetDirection = 1;
-    let offsetMultiplier = 1;
+    // 基础偏移量（距离相关）
+    const baseOffset = Math.min(distance * 0.0008, 0.3);
     
-    if (backwardIndex > 0 || forwardIndex > 0) {
-        const isForwardRoute = forwardIndex <= backwardIndex;
+    let offset;
+    
+    if (curvatureInfo) {
+        // 使用预先计算好的曲率信息
+        currentRouteIndex = curvatureInfo.curvatureIndex + 1; // 转换为1-based
         
-        if (isForwardRoute) {
-            offsetDirection = 1;
-            offsetMultiplier = 1 + forwardIndex * 0.3;
-        } else {
-            offsetDirection = -1;
-            offsetMultiplier = 1 + backwardIndex * 0.3;
+        // 曲率递增算法：第一次接近直线（曲率小），后续曲率逐渐增大
+        // 使用指数递增，让曲率变化更明显
+        const curvatureMultiplier = Math.pow(1.5, curvatureInfo.curvatureIndex); // 1.5的幂次递增
+        const maxCurvatureOffset = Math.min(baseOffset * curvatureMultiplier, baseOffset * 4); // 最大不超过基础偏移的4倍
+        
+        console.log(`曲率计算: ${trip.origin}->${trip.destination}, 曲率序号:${curvatureInfo.curvatureIndex}, 曲率倍数: ${curvatureMultiplier.toFixed(2)}, 最终偏移: ${maxCurvatureOffset.toFixed(4)}`);
+        
+        // 计算偏移方向（处理往返路线的分离）
+        offset = maxCurvatureOffset;
+        
+        // 检查是否存在反向路线，如果存在则需要左右分离
+        const routeKey = [trip.origin, trip.destination].sort().join('-');
+        if (routeGroups && routeGroups[routeKey]) {
+            const hasReverse = routeGroups[routeKey].some(item => item.direction !== trip.origin + '-' + trip.destination);
+            if (hasReverse) {
+                // 存在反向路线，奇数序号向右，偶数序号向左
+                offset = maxCurvatureOffset * (curvatureInfo.curvatureIndex % 2 === 0 ? 1 : -1);
+                console.log(`路线分离: 方向:${offset > 0 ? '右' : '左'}, 序号奇偶:${curvatureInfo.curvatureIndex % 2 === 0 ? '偶' : '奇'}`);
+            }
         }
-        
-        console.log(`路线分列: ${trip.origin}->${trip.destination}, 正向:${forwardIndex}, 反向:${backwardIndex}, 方向:${offsetDirection > 0 ? '右' : '左'}, 倍数:${offsetMultiplier}`);
+    } else {
+        // 回退到原始逻辑（兼容性）
+        offset = baseOffset;
     }
-    
-    const offset = maxOffset * offsetMultiplier * offsetDirection;
     
     // 生成平滑曲线路径
     const curvePath = generateSmoothCurve(originPos, destPos, offset);
@@ -365,7 +365,7 @@ function addTripToMap(trip, cities, isStartPoint = false, isEndPoint = false, se
             origin: trip.origin,
             destination: trip.destination,
             date: trip.date,
-            routeIndex: routeIndex + 1,
+            sequenceNumber: sequenceNumber || (curvatureInfo ? curvatureInfo.curvatureIndex + 1 : 1),
             colorIndex: colorIndex
         }
     });
@@ -381,7 +381,7 @@ function addTripToMap(trip, cities, isStartPoint = false, isEndPoint = false, se
                     📅 日期: ${trip.date}
                 </div>
                 <div style="font-size: 11px; color: #999;">
-                    第 ${routeIndex + 1} 次行程
+                    ${sequenceNumber ? `第 ${sequenceNumber} 次行程` : '单次行程'}
                 </div>
             </div>
         `,
@@ -483,6 +483,58 @@ function displayTripsOnMap(trips, cities) {
         return trips.indexOf(a) - trips.indexOf(b);
     });
     
+    // 分析相同路线的行程，为每条路线分配曲率序号
+    const routeGroups = {}; // 存储相同路线的行程组（忽略方向）
+    
+    sortedTrips.forEach((trip, index) => {
+        // 创建路线键（忽略方向的路线，这样上海-杭州和杭州-上海会被归为同一组）
+        const routeKey = [trip.origin, trip.destination].sort().join('-');
+        const directionKey = trip.origin + '-' + trip.destination;
+        
+        // 初始化路线组
+        if (!routeGroups[routeKey]) {
+            routeGroups[routeKey] = [];
+        }
+        
+        // 添加到路线组
+        routeGroups[routeKey].push({
+            trip: trip,
+            originalIndex: index,
+            direction: directionKey
+        });
+    });
+    
+    // 为每条路线的行程分配曲率序号（按时间顺序，这样第一次出现的行程曲率最小）
+    Object.keys(routeGroups).forEach(routeKey => {
+        const routeTrips = routeGroups[routeKey];
+        // 按日期排序，确保最早出现的行程获得最小的曲率序号
+        routeTrips.sort((a, b) => {
+            return a.trip.date.localeCompare(b.trip.date);
+        });
+        
+        console.log(`路线 ${routeKey} 有 ${routeTrips.length} 次行程:`, routeTrips.map(t => `${t.trip.origin}->${t.trip.destination} (${t.trip.date})`));
+        
+        // 分配曲率序号（0-based，第一次出现为0，第二次为1，以此类推）
+        routeTrips.forEach((item, curvatureIndex) => {
+            item.curvatureIndex = curvatureIndex;
+            item.totalCurvatureCount = routeTrips.length;
+            console.log(`  行程 ${item.trip.origin}->${item.trip.destination} (${item.trip.date}) 获得曲率序号: ${curvatureIndex}`);
+        });
+    });
+    
+    // 创建查找表，根据原始索引获取曲率信息
+    const curvatureInfoMap = {};
+    Object.keys(routeGroups).forEach(routeKey => {
+        routeGroups[routeKey].forEach(item => {
+            curvatureInfoMap[item.originalIndex] = {
+                curvatureIndex: item.curvatureIndex,
+                totalCurvatureCount: item.totalCurvatureCount,
+                routeKey: routeKey
+            };
+            console.log(`映射: 索引${item.originalIndex} -> 曲率${item.curvatureIndex} (${item.trip.origin}->${item.trip.destination})`);
+        });
+    });
+    
     // 找出最早的行程（同一天的第一条记录）
     let earliestTrip = null;
     let earliestDate = null;
@@ -559,8 +611,11 @@ function displayTripsOnMap(trips, cities) {
             // 获取该行程的颜色索引
             const colorIndex = tripColorMap.get(index);
             
-            // 传递序号（从1开始）和颜色索引
-            addTripToMap(trip, cities, isStartPoint, isEndPoint, index + 1, colorIndex);
+            // 获取曲率信息
+            const curvatureInfo = curvatureInfoMap[index];
+            
+            // 传递序号（从1开始）、颜色索引和曲率信息
+            addTripToMap(trip, cities, isStartPoint, isEndPoint, index + 1, colorIndex, curvatureInfo, routeGroups);
         }
     });
     
@@ -615,14 +670,15 @@ function renderTripList(trips) {
         lastDestination = trip.destination;
     });
     
-    const tripHtml = sortedTrips.map((trip) => `
+    const tripHtml = sortedTrips.map((trip, index) => `
         <div class="trip-item" 
              data-date="${trip.date}" 
              data-origin="${trip.origin}" 
              data-destination="${trip.destination}"
-             onmouseover="hoverTripOnMap('${trip.date}', '${trip.origin}', '${trip.destination}', true)"
-             onmouseout="hoverTripOnMap('${trip.date}', '${trip.origin}', '${trip.destination}', false)"
-             onclick="selectMainTripItem('${trip.date}', '${trip.origin}', '${trip.destination}', this)">
+             data-index="${index}"
+             onmouseover="hoverTripOnMap('${trip.date}', '${trip.origin}', '${trip.destination}', true, ${index})"
+             onmouseout="hoverTripOnMap('${trip.date}', '${trip.origin}', '${trip.destination}', false, ${index})"
+             onclick="selectMainTripItem('${trip.date}', '${trip.origin}', '${trip.destination}', this, ${index})">
             <div class="trip-date">${trip.date}</div>
             <div class="trip-route">
                 ${trip.origin}
@@ -641,7 +697,7 @@ function renderTripList(trips) {
 }
 
 // 主页面行程列表项选中处理
-window.selectMainTripItem = function(date, origin, destination, element) {
+window.selectMainTripItem = function(date, origin, destination, element, listIndex = null) {
     // 移除其他项的选中状态
     const allItems = document.querySelectorAll('.trip-item');
     allItems.forEach(item => item.classList.remove('selected'));
@@ -651,8 +707,8 @@ window.selectMainTripItem = function(date, origin, destination, element) {
         element.classList.add('selected');
     }
     
-    // 调用地图高亮函数
-    highlightTrip(date, origin, destination);
+    // 调用地图高亮函数，传递索引参数
+    highlightTrip(date, origin, destination, listIndex);
 };
 
 // 主页面行程列表项悬停处理（使用相同的函数）
@@ -668,14 +724,21 @@ let selectedPolylineInterval = null;
 let flowingMarkers = []; // 流动动画的标记点
 
 // 行程列表悬停时高亮对应曲线（状态2）
-window.hoverPolylineOnMap = function(date, origin, destination, isHover) {
-    // 查找对应的曲线
-    const targetPolyline = polylines.find(polyline => {
-        const extData = polyline.getExtData();
-        return extData && extData.date === date && 
-               extData.origin === origin && 
-               extData.destination === destination;
-    });
+window.hoverPolylineOnMap = function(date, origin, destination, isHover, listIndex = null) {
+    let targetPolyline = null;
+    
+    if (listIndex !== null) {
+        // 使用索引查找特定的曲线
+        targetPolyline = polylines[listIndex];
+    } else {
+        // 回退到原始的查找方式（兼容性）
+        targetPolyline = polylines.find(polyline => {
+            const extData = polyline.getExtData();
+            return extData && extData.date === date && 
+                   extData.origin === origin && 
+                   extData.destination === destination;
+        });
+    }
     
     if (!targetPolyline) {
         return;
@@ -704,14 +767,21 @@ window.hoverPolylineOnMap = function(date, origin, destination, isHover) {
 };
 
 // 高亮显示特定行程（点击选中 - 状态3）
-function highlightTrip(date, origin, destination) {
-    // 查找对应的曲线
-    const targetPolyline = polylines.find(polyline => {
-        const extData = polyline.getExtData();
-        return extData && extData.date === date && 
-               extData.origin === origin && 
-               extData.destination === destination;
-    });
+function highlightTrip(date, origin, destination, listIndex = null) {
+    let targetPolyline = null;
+    
+    if (listIndex !== null) {
+        // 使用索引查找特定的曲线
+        targetPolyline = polylines[listIndex];
+    } else {
+        // 回退到原始的查找方式（兼容性）
+        targetPolyline = polylines.find(polyline => {
+            const extData = polyline.getExtData();
+            return extData && extData.date === date && 
+                   extData.origin === origin && 
+                   extData.destination === destination;
+        });
+    }
     
     if (!targetPolyline) {
         console.warn('未找到对应的曲线:', date, origin, destination);
