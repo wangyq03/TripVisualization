@@ -527,6 +527,7 @@ if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
             localStorage.setItem('lastLogin', now);
         });
     </script>
+<<<<<<< HEAD
     
     <!-- 底部区域 -->
     <footer class="footer">
@@ -555,6 +556,9 @@ if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
       s.parentNode.insertBefore(hm, s);
     })();
     </script>
+=======
+    </div>
+>>>>>>> 38d2b0755fbbc3d10ba914acf4143cc3cdc98e1e
     <!-- 用户菜单组件 -->
     <script src="js/user-menu.js"></script>
 </body>

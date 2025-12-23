@@ -310,6 +310,7 @@ if (!isset($_SESSION['user_role']) || $_SESSION['user_role'] !== 'admin') {
                 </div>
             </div>
         </div>
+<<<<<<< HEAD
 
         <!-- 底部区域 -->
         <footer class="footer">
@@ -338,6 +339,8 @@ if (!isset($_SESSION['user_role']) || $_SESSION['user_role'] !== 'admin') {
       s.parentNode.insertBefore(hm, s);
     })();
     </script>
+=======
+>>>>>>> 38d2b0755fbbc3d10ba914acf4143cc3cdc98e1e
     <!-- JavaScript -->
     <script src="js/cities-manager.js?v=2024011903"></script>
     

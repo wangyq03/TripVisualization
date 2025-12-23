@@ -226,6 +226,7 @@ if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
                 </div>
             </div>
         </div>
+<<<<<<< HEAD
 
         <!-- 底部区域 -->
         <footer class="footer">
@@ -255,6 +256,9 @@ if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
     })();
     </script>
     <!-- JavaScript -->
+=======
+    </div>
+>>>>>>> 38d2b0755fbbc3d10ba914acf4143cc3cdc98e1e
     <!-- SheetJS for Excel parsing -->
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     

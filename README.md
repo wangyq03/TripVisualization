@@ -2,11 +2,19 @@
 
 一个功能完整的基于PHP和高德地图的Web应用，用于在地图上可视化展示和管理您的路线信息。
 
+<<<<<<< HEAD
 > **✨ 最新更新**：v3.5.0 全面数据库集成！城市管理和用户认证完全基于远程MySQL数据库，提供企业级数据管理和安全性！
 
 ![GitHub](https://img.shields.io/badge/PHP-7.4+-blue)
 ![GitHub](https://img.shields.io/badge/License-MIT-green)
 ![GitHub](https://img.shields.io/badge/Version-v3.4.0-orange)
+=======
+> **✨ 最新更新**：v3.3.1 MySQL数据库集成！用户数据迁移到远程MySQL服务器，提供更好的数据管理和扩展性！
+
+![GitHub](https://img.shields.io/badge/PHP-7.4+-blue)
+![GitHub](https://img.shields.io/badge/License-MIT-green)
+![GitHub](https://img.shields.io/badge/Version-v3.3.1-orange)
+>>>>>>> 38d2b0755fbbc3d10ba914acf4143cc3cdc98e1e
 
 ---
 
@@ -106,14 +114,22 @@
 
 - **PHP 7.4+** 或更高版本
 - **Web服务器**（Apache、Nginx 或 PHP内置服务器）
+<<<<<<< HEAD
 - **MySQL 5.7+** 或更高版本（存储用户和城市数据）
+=======
+- **MySQL 5.7+** 或更高版本
+>>>>>>> 38d2b0755fbbc3d10ba914acf4143cc3cdc98e1e
 - **现代浏览器**支持 JavaScript ES6+
 - **高德地图 API Key**（免费申请）
 - **PDO MySQL扩展**（PHP数据库连接）
 
 ### 1. 配置数据库
 
+<<<<<<< HEAD
 **重要**：系统现在需要MySQL数据库来存储用户和城市数据。
+=======
+**重要**：系统现在需要MySQL数据库来存储用户数据。
+>>>>>>> 38d2b0755fbbc3d10ba914acf4143cc3cdc98e1e
 
 #### 数据库配置：
 
@@ -122,8 +138,15 @@
 CREATE DATABASE route_visualization CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 ```
 
+<<<<<<< HEAD
 2. 导入表结构：
 请手动创建用户和城市相关的数据表结构。
+=======
+2. 导入用户表：
+```bash
+mysql -u root -p route_visualization < create_users.sql
+```
+>>>>>>> 38d2b0755fbbc3d10ba914acf4143cc3cdc98e1e
 
 3. 创建数据库用户（推荐）：
 ```sql
@@ -132,8 +155,18 @@ GRANT SELECT, INSERT, UPDATE, DELETE ON route_visualization.* TO 'route_user'@'l
 FLUSH PRIVILEGES;
 ```
 
+<<<<<<< HEAD
 4. 配置数据库连接：
 编辑 `api/config.php`，配置数据库连接参数。
+=======
+4. 创建配置文件：
+```bash
+# 复制配置模板
+cp api/config.php.example api/config.php
+# 编辑配置文件
+nano api/config.php
+```
+>>>>>>> 38d2b0755fbbc3d10ba914acf4143cc3cdc98e1e
 
 5. 修改数据库连接配置：
 编辑 `api/config.php`，修改数据库连接参数：
@@ -147,12 +180,19 @@ $db_config = [
 ];
 ```
 
+<<<<<<< HEAD
 6. 导入城市数据（可选）：
 手动通过城市管理界面添加城市数据。
 
 > 📁 **配置文件**：`api/config.php` 存放数据库连接参数，请确保文件权限安全。
 > 🛡️ **安全提示**：不要将数据库密码提交到版本控制系统，建议使用环境变量。
 > 🏙️ **城市数据**：现在支持MySQL存储，提供更好的性能和可扩展性！
+=======
+> 📁 **配置文件**：`api/config.php` 存放数据库连接参数，请确保文件权限安全。
+> 📝 **配置模板**：使用 `api/config.php.example` 作为配置模板。
+
+> 🛡️ **安全提示**：不要将数据库密码提交到版本控制系统，建议使用环境变量。
+>>>>>>> 38d2b0755fbbc3d10ba914acf4143cc3cdc98e1e
 
 ### 2. 获取高德地图 API Key
 
@@ -236,13 +276,23 @@ chmod 644 data/*
 ## 📂 项目结构
 
 ```
+<<<<<<< HEAD
 TripVisualization/
 ├── 📁 api/                  # 后端API接口
 │   ├── config.php          # 数据库配置文件
 │   ├── auth.php            # 用户认证API
+=======
+tyt-maps.coolqing.com/
+├── 📁 api/                  # 后端API接口
+│   ├── config.php.example    # 数据库配置模板
+│   ├── config.php          # 数据库配置文件（需要创建）
+│   ├── auth.php            # 用户认证API（MySQL）
+>>>>>>> 38d2b0755fbbc3d10ba914acf4143cc3cdc98e1e
 │   ├── cities.php          # 城市数据API
 │   ├── common.php          # 公共函数
 │   └── trips.php           # 行程数据API
+├── 📄 create_users.sql     # 用户表结构和默认数据
+├── 📄 .gitignore          # 版本控制忽略文件
 ├── 📁 css/                  # 前端样式
 │   └── common.css          # 公共样式
 ├── 📁 data/                 # 数据存储
@@ -265,6 +315,7 @@ TripVisualization/
 **核心文件说明**：
 - **前端页面**：5个主要页面（登录、地图、编辑、管理、个人中心）
 - **后端API**：3个RESTful API（认证、城市、行程）
+<<<<<<< HEAD
 - **数据库**：MySQL远程数据库（用户 + 城市数据）
 - **数据存储**：
   - **远程MySQL数据库**：用户数据 + 城市数据（主要存储）
@@ -272,6 +323,15 @@ TripVisualization/
   - **CSV格式**：行程数据（本地文件存储）
 - - **配置文件**：`config.php` 数据库连接配置
 - **文档**：`README.md` 项目完整说明文档
+=======
+- **数据存储**：
+  - **MySQL**：用户数据（新增）
+  - **JSON格式**：城市坐标库
+  - **CSV格式**：行程数据
+- **配置文件**：`config.php` 数据库连接配置
+- **SQL文件**：`create_users.sql` 用户表结构和默认数据
+- **前端资源**：统一CSS样式 + 模块化JS脚本
+>>>>>>> 38d2b0755fbbc3d10ba914acf4143cc3cdc98e1e
 
 ---
 
@@ -841,6 +901,7 @@ $users = [
 
 ## 🔄 更新日志
 
+<<<<<<< HEAD
 ### v3.5.0 (2025-12-22) - 当前版本
 
 #### 🌐 全面数据库集成（重大更新）
@@ -954,6 +1015,9 @@ $users = [
 - **性能监控**：导入进度实时显示
 
 ### v3.3.1 (2025-01-20)
+=======
+### v3.3.1 (2025-01-20) - 当前版本
+>>>>>>> 38d2b0755fbbc3d10ba914acf4143cc3cdc98e1e
 
 #### 🗄️ 数据库升级
 - 🔧 **MySQL集成**：用户数据从文件存储迁移到MySQL数据库

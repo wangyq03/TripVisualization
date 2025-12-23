@@ -381,6 +381,7 @@ body {
 
 .main-content {
     flex: 1;
+<<<<<<< HEAD
 }
 
 /* 底部区域样式 */
@@ -468,4 +469,6 @@ body {
         margin-left: 0;
         align-self: center;
     }
+=======
+>>>>>>> 38d2b0755fbbc3d10ba914acf4143cc3cdc98e1e
 }
