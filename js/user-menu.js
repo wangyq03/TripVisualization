@@ -463,7 +463,7 @@ class UserMenu {
 
             .user-name {
                 font-weight: 600;
-                color: rgba(255, 255, 255, 0.9);
+                color: rgba(72, 107, 142, 0.9);
                 font-size: 14px;
             }
 

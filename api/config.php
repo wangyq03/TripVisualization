@@ -9,17 +9,15 @@
  * 2. 使用强密码
  * 3. 设置适当的文件权限 (chmod 640)
  * 4. 考虑使用环境变量存储敏感信息
- * 
- * 注意：此文件包含敏感信息，请勿提交到版本控制系统
  */
 
 // 数据库连接配置
 $db_config = [
     'host' => 'localhost',             // 数据库主机
     'port' => 3306,                  // 数据库端口
-    'dbname' => 'your_database_name',  // 数据库名
-    'username' => 'your_username', // 数据库用户名
-    'password' => 'your_password', // 数据库密码
+    'dbname' => 'dbname',  // 数据库名
+    'username' => 'username', // 数据库用户名
+    'password' => 'password', // 数据库密码
     'charset' => 'utf8mb4',
     'options' => [
         PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,

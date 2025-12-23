@@ -866,57 +866,8 @@ function highlightTrip(date, origin, destination, listIndex = null) {
     }
 }
 
-// 显示行程信息
-function highlightTripInfo(tripInfo) {
-    const infoDiv = document.createElement('div');
-    infoDiv.style.cssText = `
-        position: fixed;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        background: rgba(0,0,0,0.8);
-        color: white;
-        padding: 20px;
-        border-radius: 10px;
-        font-size: 16px;
-        z-index: 1000;
-        animation: fadeIn 0.3s ease;
-        max-width: 400px;
-        text-align: center;
-    `;
-    infoDiv.innerHTML = `
-        <strong>路线信息</strong><br><br>
-        ${tripInfo}<br><br>
-        <small style="opacity: 0.8;">点击任意位置关闭</small>
-    `;
-    
-    document.body.appendChild(infoDiv);
-    
-    // 添加淡入动画
-    const style = document.createElement('style');
-    style.textContent = `
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
-            to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
-        }
-    `;
-    document.head.appendChild(style);
-    
-    // 点击关闭
-    setTimeout(() => {
-        document.addEventListener('click', function closeInfo(e) {
-            if (!infoDiv.contains(e.target)) {
-                if (infoDiv.parentNode) {
-                    infoDiv.parentNode.removeChild(infoDiv);
-                }
-                if (style.parentNode) {
-                    style.parentNode.removeChild(style);
-                }
-                document.removeEventListener('click', closeInfo);
-            }
-        });
-    }, 100);
-}
+// 显示行程信息功能已移除 - 未使用的函数
+// 如需行程信息显示，请使用地图自带的 InfoWindow 功能
 
 // 更新统计信息
 function updateStats(trips) {

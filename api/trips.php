@@ -7,59 +7,11 @@ header('Access-Control-Allow-Headers: Content-Type');
 // 设置时区
 date_default_timezone_set('Asia/Shanghai');
 
-/**
- * WGS84坐标转GCJ02坐标（火星坐标）
- * 高德地图使用GCJ02坐标系
- */
-function wgs84ToGcj02($wgsLat, $wgsLng) {
-    // 常量定义
-    $PI = 3.1415926535897932384626;
-    $a = 6378245.0; // 长半轴
-    $ee = 0.00669342162296594323; // 偏心率平方
-    
-    // 判断是否在中国境外
-    if (outOfChina($wgsLat, $wgsLng)) {
-        return ['lat' => $wgsLat, 'lng' => $wgsLng];
-    }
-    
-    $dLat = transformLat($wgsLng - 105.0, $wgsLat - 35.0);
-    $dLng = transformLng($wgsLng - 105.0, $wgsLat - 35.0);
-    $radLat = $wgsLat / 180.0 * $PI;
-    $magic = sin($radLat);
-    $magic = 1 - $ee * $magic * $magic;
-    $sqrtMagic = sqrt($magic);
-    $dLat = ($dLat * 180.0) / (($a * (1 - $ee)) / ($magic * $sqrtMagic) * $PI);
-    $dLng = ($dLng * 180.0) / ($a / $sqrtMagic * cos($radLat) * $PI);
-    $mgLat = $wgsLat + $dLat;
-    $mgLng = $wgsLng + $dLng;
-    
-    return ['lat' => $mgLat, 'lng' => $mgLng];
-}
+// 引入数据库配置
+require_once 'config.php';
+require_once 'common.php';
 
-function transformLat($lng, $lat) {
-    $PI = 3.1415926535897932384626;
-    $ret = -100.0 + 2.0 * $lng + 3.0 * $lat + 0.2 * $lat * $lat + 
-           0.1 * $lng * $lat + 0.2 * sqrt(abs($lng));
-    $ret += (20.0 * sin(6.0 * $lng * $PI) + 20.0 * sin(2.0 * $lng * $PI)) * 2.0 / 3.0;
-    $ret += (20.0 * sin($lat * $PI) + 40.0 * sin($lat / 3.0 * $PI)) * 2.0 / 3.0;
-    $ret += (160.0 * sin($lat / 12.0 * $PI) + 320 * sin($lat * $PI / 30.0)) * 2.0 / 3.0;
-    return $ret;
-}
-
-function transformLng($lng, $lat) {
-    $PI = 3.1415926535897932384626;
-    $ret = 300.0 + $lng + 2.0 * $lat + 0.1 * $lng * $lng + 
-           0.1 * $lng * $lat + 0.1 * sqrt(abs($lng));
-    $ret += (20.0 * sin(6.0 * $lng * $PI) + 20.0 * sin(2.0 * $lng * $PI)) * 2.0 / 3.0;
-    $ret += (20.0 * sin($lng * $PI) + 40.0 * sin($lng / 3.0 * $PI)) * 2.0 / 3.0;
-    $ret += (150.0 * sin($lng / 12.0 * $PI) + 300.0 * sin($lng / 30.0 * $PI)) * 2.0 / 3.0;
-    return $ret;
-}
-
-function outOfChina($lat, $lng) {
-    return ($lng < 72.004 || $lng > 137.8347) || 
-           (($lat < 0.8293 || $lat > 55.8271));
-}
+// 数据库中存储的是高德坐标系（GCJ02），无需转换
 
 
 // 保存行程数据（全量替换）
@@ -161,16 +113,46 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 // 读取城市数据
 function loadCities() {
-    $citiesFile = __DIR__ . '/../data/cities.json';
-    if (!file_exists($citiesFile)) {
-        return [];
+    require_once __DIR__ . '/config.php';
+    
+    $pdo = getDBConnection();
+    if (!$pdo) {
+        throw new Exception('数据库连接失败');
     }
     
-    $jsonContent = file_get_contents($citiesFile);
-    $cities = json_decode($jsonContent, true);
-    
-    return $cities ?: [];
+    try {
+        $stmt = $pdo->prepare("
+            SELECT id, name, latitude, longitude, note, created_at, updated_at, created_by, is_active
+            FROM cities 
+            WHERE is_active = TRUE 
+            ORDER BY name
+        ");
+        $stmt->execute();
+        
+        $cities = [];
+        while ($row = $stmt->fetch()) {
+            $cities[$row['name']] = [
+                'latitude' => floatval($row['latitude']),
+                'longitude' => floatval($row['longitude']),
+                'note' => $row['note'],
+                'created_at' => $row['created_at'],
+                'updated_at' => $row['updated_at'],
+                'created_by' => $row['created_by'],
+                'is_active' => (bool)$row['is_active'],
+                'id' => $row['id']
+            ];
+        }
+        
+        return $cities;
+    } catch (PDOException $e) {
+        error_log("读取城市数据失败: " . $e->getMessage());
+        
+        // 如果数据库失败，回退到JSON文件
+        return loadCitiesFromFile();
+    }
 }
+
+// 从文件读取城市数据（备用方案）- 已移动到 common.php
 
 // 读取行程数据
 function loadTrips($startDate = '', $endDate = '') {
@@ -237,12 +219,7 @@ if (isset($_GET['action']) && $_GET['action'] === 'current') {
         $cities = loadCities();
         $trips = loadTrips('', ''); // 不筛选日期
         
-        // 转换城市坐标为GCJ02（高德坐标系）
-        foreach ($cities as $cityName => $cityData) {
-            $converted = wgs84ToGcj02($cityData['latitude'], $cityData['longitude']);
-            $cities[$cityName]['latitude'] = $converted['lat'];
-            $cities[$cityName]['longitude'] = $converted['lng'];
-        }
+        // 注释：数据库中的坐标已经是高德坐标系，无需转换
         
         echo json_encode([
             'success' => true,
@@ -290,12 +267,7 @@ try {
     $cities = loadCities();
     $trips = loadTrips($startDate, $endDate);
     
-    // 转换城市坐标为GCJ02（高德坐标系）
-    foreach ($cities as $cityName => $cityData) {
-        $converted = wgs84ToGcj02($cityData['latitude'], $cityData['longitude']);
-        $cities[$cityName]['latitude'] = $converted['lat'];
-        $cities[$cityName]['longitude'] = $converted['lng'];
-    }
+    // 注释：数据库中的坐标已经是高德坐标系，无需转换
     
     // 返回响应
     echo json_encode([

@@ -193,6 +193,17 @@ if (!isset($_SESSION['user_role']) || $_SESSION['user_role'] !== 'admin') {
             display: none;
         }
     </style>
+    
+    <!-- 百度统计 -->
+    <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?739d66c954a69a41a8630902e089bf79";
+      var s = document.getElementsByTagName("script")[0]; 
+      s.parentNode.insertBefore(hm, s);
+    })();
+    </script>
 </head>
 <body>
     <div class="main-content">
@@ -251,19 +262,12 @@ if (!isset($_SESSION['user_role']) || $_SESSION['user_role'] !== 'admin') {
                 
                 <div class="data-input-section">
                     <div class="format-guide">
-                        <h4>📝 格式要求</h4>
-                        <p>每行一个城市，格式为：<strong>城市,北纬,东经,备注</strong></p>
+                        <h4>📝 格式要求：每行一个城市，数据格式：<strong>城市,北纬,东经,备注</strong></h4>
                         <div class="example">
                             北京,39.9042,116.4074,首都<br>
                             上海,31.2304,121.4737,经济中心<br>
                             广州,23.1291,113.2644,南方门户
                         </div>
-                        <small style="color: #666;">
-                            • 城市名称：中文名称，如"北京"<br>
-                            • 北纬：十进制格式，如 39.9042<br>
-                            • 东经：十进制格式，如 116.4074<br>
-                            • 备注：可选，可留空
-                        </small>
                     </div>
 
                     <div class="form-group">
@@ -306,6 +310,34 @@ if (!isset($_SESSION['user_role']) || $_SESSION['user_role'] !== 'admin') {
                 </div>
             </div>
         </div>
+
+        <!-- 底部区域 -->
+        <footer class="footer">
+            <div class="footer-container">
+                <div class="footer-content">
+                    <div class="footer-links">
+                        <a href="https://tyt-maps.coolqing.com/exchangetools/" target="_blank" class="footer-link">
+                            <span class="footer-link-icon">🔧</span>
+                            新代调发货转换手机号工具
+                        </a>
+                    </div>
+                    <div class="footer-text">
+                        © <?php echo date('Y'); ?> 路线可视化展示系统
+                    </div>
+                </div>
+            </div>
+        </footer>
+    </div>
+    <!-- 百度统计 -->
+    <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?739d66c954a69a41a8630902e089bf79";
+      var s = document.getElementsByTagName("script")[0]; 
+      s.parentNode.insertBefore(hm, s);
+    })();
+    </script>
     <!-- JavaScript -->
     <script src="js/cities-manager.js?v=2024011903"></script>
     

@@ -527,7 +527,34 @@ if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
             localStorage.setItem('lastLogin', now);
         });
     </script>
+    
+    <!-- 底部区域 -->
+    <footer class="footer">
+        <div class="footer-container">
+            <div class="footer-content">
+                <div class="footer-links">
+                    <a href="https://tyt-maps.coolqing.com/exchangetools/" target="_blank" class="footer-link">
+                        <span class="footer-link-icon">🔧</span>
+                        新代调发货转换手机号工具
+                    </a>
+                </div>
+                <div class="footer-text">
+                    © <?php echo date('Y'); ?> 路线可视化展示系统
+                </div>
+            </div>
+        </div>
+    </footer>
     </div>
+    <!-- 百度统计 -->
+    <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?739d66c954a69a41a8630902e089bf79";
+      var s = document.getElementsByTagName("script")[0]; 
+      s.parentNode.insertBefore(hm, s);
+    })();
+    </script>
     <!-- 用户菜单组件 -->
     <script src="js/user-menu.js"></script>
 </body>
