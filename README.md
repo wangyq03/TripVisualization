@@ -1,26 +1,13 @@
 # 🗺️ 路线可视化展示系统
 
 一个功能完整的基于PHP和高德地图的Web应用，用于在地图上可视化展示和管理您的路线信息。
+本系统使用codebuddy完成所有开发，
 
 > **✨ 最新更新**：v3.5.0 全面数据库集成！城市管理和用户认证完全基于远程MySQL数据库，提供企业级数据管理和安全性！
 
 ![GitHub](https://img.shields.io/badge/PHP-7.4+-blue)
 ![GitHub](https://img.shields.io/badge/License-MIT-green)
 ![GitHub](https://img.shields.io/badge/Version-v3.4.0-orange)
-
----
-
-## 📑 目录
-
-- [功能特性](#-功能特性)
-- [快速开始](#-快速开始)
-- [项目结构](#-项目结构)
-- [详细使用](#-详细使用)
-- [高级功能](#-高级功能)
-- [API文档](#-api文档)
-- [常见问题](#-常见问题)
-- [技术栈](#-技术栈)
-- [更新日志](#-更新日志)
 
 ---
 
@@ -72,7 +59,6 @@
 - **🌐 数据库优先**：以数据库为主存储，JSON文件作为备份
 - **🔧 管理界面**：
   - Web界面管理：`cities-manager.php` - 可视化城市管理界面
-
   - 个人中心：`profile.php` - 用户信息管理
 
 ### 🔐 用户认证系统
@@ -121,10 +107,8 @@
 ```sql
 CREATE DATABASE route_visualization CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 ```
-
 2. 导入表结构：
 请手动创建用户和城市相关的数据表结构。
-
 
 3. 创建数据库用户（推荐）：
 ```sql
@@ -132,7 +116,6 @@ CREATE USER 'route_user'@'localhost' IDENTIFIED BY 'your_secure_password';
 GRANT SELECT, INSERT, UPDATE, DELETE ON route_visualization.* TO 'route_user'@'localhost';
 FLUSH PRIVILEGES;
 ```
-
 4. 配置数据库连接：
 编辑 `api/config.php`，配置数据库连接参数。
 
@@ -182,41 +165,7 @@ $db_config = [
 
 > 💡 **免费额度**：个人开发者免费 30万次/天，足够个人项目使用！
 
-### 2. 本地测试（推荐）
-
-**Windows用户**：
-
-```bash
-# 双击运行
-start-server.bat
-
-# 或手动启动
-php -S localhost:8000
-```
-
-**Mac/Linux用户**：
-
-```bash
-php -S localhost:8000
-```
-
-然后访问：`http://localhost:8000`
-
-### 3. 服务器部署
-
-```bash
-# 上传项目文件
-scp -r /path/to/project/* user@server:/var/www/html/
-
-# 设置权限
-chmod 755 data/
-chmod 644 data/*
-
-# 配置Web服务器（Apache/Nginx）
-# 根目录指向项目目录
-```
-
-### 4. 登录系统
+7. 登录系统
 
 **默认账户**（部署后请立即修改）：
 - **管理员**：`admin` / `admin123`
@@ -224,7 +173,7 @@ chmod 644 data/*
 
 > ⚠️ **安全提醒**：部署后请立即修改默认密码，使用强密码策略。
 
-### 5. 开始使用
+### 3. 开始使用
 
 1. **查看地图**：访问首页 `index.php`
 2. **上传行程**：点击"行程编辑"，上传CSV或Excel文件
@@ -614,91 +563,6 @@ Content-Type: application/json
 }
 ```
 
-### 数据库配置
-
-#### 📄 配置文件
-
-系统已优化数据库配置管理：
-
-**配置文件分离**：
-- `api/config.php.example` - 配置模板（可提交到版本控制）
-- `api/config.php` - 实际配置文件（需手动创建，包含敏感信息）
-
-**安全措施**：
-- `.gitignore` 已配置，防止敏感配置文件泄露
-- 支持环境变量覆盖配置
-- 使用专用数据库用户建议
-
-系统使用 `api/config.php` 存储数据库连接参数：
-
-```php
-<?php
-// 数据库配置
-$db_config = [
-    'host' => 'localhost',        // 数据库主机
-    'dbname' => 'route_visualization',  // 数据库名
-    'username' => 'your_db_user',  // 数据库用户名
-    'password' => 'your_secure_password',  // 数据库密码
-    'charset' => 'utf8mb4',
-    'options' => [
-        PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-        PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-        PDO::ATTR_EMULATE_PREPARES => false,
-    ]
-];
-```
-
-#### 🛡️ 安全配置建议
-
-1. **专用数据库用户**：
-```sql
--- 创建专用用户（不要使用root）
-CREATE USER 'route_app'@'localhost' IDENTIFIED BY 'StrongPassword123!';
--- 只授予必要权限
-GRANT SELECT, INSERT, UPDATE, DELETE ON route_visualization.* TO 'route_app'@'localhost';
-FLUSH PRIVILEGES;
-```
-
-2. **环境变量配置**：
-```php
-// 推荐使用环境变量
-$db_config = [
-    'host' => $_ENV['DB_HOST'] ?? 'localhost',
-    'dbname' => $_ENV['DB_NAME'] ?? 'route_visualization', 
-    'username' => $_ENV['DB_USER'] ?? 'route_app',
-    'password' => $_ENV['DB_PASS'] ?? 'default_password'
-];
-```
-
-3. **文件安全**：
-```bash
-# 设置适当的文件权限
-chmod 640 api/config.php
-chown www-data:www-data api/config.php
-```
-
-#### 🔄 从文件系统迁移
-
-如果您要从旧版本（文件存储用户）迁移到MySQL：
-
-1. **备份现有数据**：
-```bash
-cp api/auth.php api/auth.php.backup
-```
-
-2. **部署新配置**：
-```bash
-# 复制配置模板
-cp api/config.php.example api/config.php
-# 编辑配置文件
-nano api/config.php
-```
-
-3. **导入用户表**：
-```bash
-mysql -u root -p route_visualization < create_users.sql
-```
-
 ### 用户认证 API
 
 ```http
@@ -818,27 +682,6 @@ $users = [
 
 ---
 
-## 🎨 技术栈
-
-### 后端
-- **PHP 7.4+**
-- **MySQL 5.7+** 数据库存储（用户 + 城市）
-- **JSON** 数据存储（备份）
-- **CSV** 文件处理（行程数据）
-
-### 前端
-- **HTML5** + **CSS3** + **JavaScript ES6+**
-- **高德地图 JS API v2.0**
-- **SheetJS** (XLSX.js) - Excel文件解析
-- **原生CSS**（Grid, Flexbox）
-- **响应式设计**
-
-### 地图服务
-- **高德地图 JavaScript API v2.0**
-- **GCJ02坐标系**（火星坐标）
-- **自动坐标转换**（WGS84 → GCJ02）
-
----
 
 ## 🔄 更新日志
 
@@ -863,18 +706,6 @@ $users = [
 - 完整的密码修改功能
 - 用户统计信息展示
 - 权限级别管理
-
-**技术改进**：
-- 🗄️ **数据库优化**：索引、外键约束、软删除
-- 🔧 **API完善**：RESTful API设计，统一响应格式
-- 📝 **错误处理**：完善的异常处理和日志记录
-- 🎨 **UI/UX优化**：现代化界面设计，流畅交互体验
-
-#### 重要变更
-- **用户认证**：从文件存储升级到MySQL数据库认证
-- **城市管理**：完全基于数据库的CRUD操作
-- **个人中心**：新增完整的用户管理功能
-- **数据安全**：企业级数据安全和管理能力
 
 ### v3.4.0 (2025-01-22)
 
@@ -902,58 +733,6 @@ $users = [
 - ⚡ **数据库索引**：支持高效的城市查询
 - 🔍 **地理查询**：支持按坐标范围搜索
 
-**数据质量**：
-- ✅ **输入验证**：严格的坐标范围检查（-90~90°, -180~180°）
-- 🇨🇳 **中国验证**：可选的中国境内坐标范围验证
-- 🔍 **重复检查**：防止重复城市名称
-- 📈 **统计信息**：实时显示新增、更新、跳过、错误数量
-
-**用户体验**：
-- 🎨 **管理界面**：增强的城市管理界面
-- 📊 **数据统计**：城市数量、有效坐标、今日更新统计
-- 🔄 **批量操作**：支持批量添加、更新、删除
-- 💡 **操作提示**：详细的错误信息和解决建议
-
-#### 🗂️ 新增文件
-
-**数据库相关**：
-- `create_cities.sql` - 城市表结构和索引
-- `import_cities.php` - 数据导入工具（Web + CLI）
-- `quick_import.sh` - 快速导入脚本
-- `test_db.php` - 数据库测试工具
-- `fix_foreign_keys.php` - 外键修复工具
-- `CITIES_DATABASE_SETUP.md` - 完整设置文档
-
-#### 📝 重要变更
-
-- **城市数据存储**：从纯JSON文件改为MySQL数据库存储
-- **API响应格式**：新增数据库字段（id、created_at、updated_at等）
-- **城市管理界面**：支持数据库操作和统计信息
-- **导入流程**：提供多种导入方式和强大的错误处理
-
-#### ⚠️ 部署注意事项
-
-1. **数据库升级**：
-   ```bash
-   mysql -u root -p route_visualization < create_cities.sql
-   ```
-
-2. **城市数据导入**：
-   ```bash
-   ./quick_import.sh
-   ```
-
-3. **测试验证**：
-   - 访问 `test_db.php` 检查数据库状态
-   - 访问 `import_cities.php` 测试导入功能
-
-#### 🔧 技术改进
-
-- **事务支持**：数据库操作使用事务，确保数据一致性
-- **级联删除**：外键约束支持级联操作
-- **错误恢复**：完善的错误处理和回滚机制
-- **性能监控**：导入进度实时显示
-
 ### v3.3.1 (2025-01-20)
 
 #### 🗄️ 数据库升级
@@ -968,26 +747,6 @@ $users = [
   - 角色权限管理（admin/user）
   - 会话管理和登录日志
   - 数据库参数配置（非硬编码）
-
-#### 📁 文件结构调整
-- 📝 **配置管理**：
-  - 独立的数据库配置文件
-  - 用户表SQL创建脚本
-  - 安全的凭据管理建议
-- 🗂️ **新增文件**：
-  - `api/config.php` - 数据库连接配置
-  - `create_users.sql` - 用户表结构和数据
-
-#### 📖 文档更新
-- 📘 **部署指南**：新增MySQL数据库配置步骤
-- 🛡️ **安全配置**：数据库安全最佳实践
-- 🔧 **SQL文档**：完整的用户表结构说明
-- ✅ **部署检查清单**：确保安全部署的必要步骤
-
-#### ⚠️ 重要提醒
-- **部署后操作**：立即修改默认密码
-- **安全建议**：使用专用数据库用户
-- **配置文件**：不要将凭据提交到版本控制
 
 ### v3.3.0 (2025-01-20)
 
